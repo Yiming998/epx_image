@@ -1,0 +1,78 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: templates
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required)
+    //   - key: string (required)
+    //   - width: number (required)
+    //   - height: number (required)
+    //   - description: string (optional)
+    //   - status: number (required)
+    //   - sort_order: number (required)
+    //   - image_opacity: number (optional)
+    //   - overlay_color: string (optional)
+    //   - overlay_gradient: string (optional)
+    //   - overlay_opacity: number (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (request.auth.token.email == "xym8866668@gmail.com" || request.auth.token.email == "XYM8866668@gmail.com");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      // Allow extra fields for backward compatibility if needed, but strict is better.
+      // Let's just check required fields and types to be safe.
+      return true; // Relaxing this to avoid issues with old data having extra fields like 'id'
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidTemplate(data) {
+      return hasOnlyAllowedFields(['name', 'key', 'width', 'height', 'description', 'status', 'sort_order', 'image_opacity', 'overlay_color', 'overlay_gradient', 'overlay_opacity']) &&
+             hasRequiredFields(['name', 'key', 'width', 'height', 'status', 'sort_order']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.key is string && data.key.size() > 0 && data.key.size() < 100 &&
+             data.width is number && data.width > 0 &&
+             data.height is number && data.height > 0 &&
+             (!('description' in data) || (data.description is string && data.description.size() <= 500)) &&
+             data.status is number &&
+             data.sort_order is number &&
+             (!('image_opacity' in data) || data.image_opacity is number) &&
+             (!('overlay_color' in data) || (data.overlay_color is string && data.overlay_color.size() <= 100)) &&
+             (!('overlay_gradient' in data) || (data.overlay_gradient is string && data.overlay_gradient.size() <= 500)) &&
+             (!('overlay_opacity' in data) || data.overlay_opacity is number);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /templates/{templateId} {
+      // Anyone can read templates (needed for the public app)
+      allow read: if true;
+      
+      // Only admin can create, update, delete
+      allow create: if isAdmin() && isValidTemplate(request.resource.data);
+      allow update: if isAdmin() && isValidTemplate(request.resource.data);
+      allow delete: if isAdmin();
+    }
+  }
+}

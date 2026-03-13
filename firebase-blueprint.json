@@ -1,0 +1,71 @@
+{
+  "entities": {
+    "Template": {
+      "title": "Template",
+      "description": "A template for image cropping",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the template"
+        },
+        "key": {
+          "type": "string",
+          "description": "The unique key of the template"
+        },
+        "width": {
+          "type": "number",
+          "description": "The width of the template"
+        },
+        "height": {
+          "type": "number",
+          "description": "The height of the template"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the template"
+        },
+        "status": {
+          "type": "number",
+          "description": "The status of the template (1 for active, 0 for inactive)"
+        },
+        "sort_order": {
+          "type": "number",
+          "description": "The sort order of the template"
+        },
+        "image_opacity": {
+          "type": "number",
+          "description": "The opacity of the image"
+        },
+        "overlay_color": {
+          "type": "string",
+          "description": "The overlay color of the template"
+        },
+        "overlay_gradient": {
+          "type": "string",
+          "description": "The overlay gradient of the template"
+        },
+        "overlay_opacity": {
+          "type": "number",
+          "description": "The overlay opacity of the template"
+        }
+      },
+      "required": [
+        "name",
+        "key",
+        "width",
+        "height",
+        "status",
+        "sort_order"
+      ]
+    }
+  },
+  "firestore": {
+    "templates": {
+      "schema": {
+        "$ref": "#/entities/Template"
+      },
+      "description": "Stores all the image cropping templates"
+    }
+  }
+}
